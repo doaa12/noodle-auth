@@ -2,8 +2,8 @@
 <launch4jConfig>
   <dontWrapJar>false</dontWrapJar>
   <headerType>gui</headerType>
-  <jar>dist\woath.jar</jar>
-  <outfile>dist\woath.exe</outfile>
+  <jar>dist/noodle-auth.jar</jar>
+  <outfile>dist/noodle-auth.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>
   <chdir>.</chdir>
