@@ -49,11 +49,13 @@ public class Account {
         this.validity = validity;
     }
 
-    public OTP generateOTP(long time) {
+    public String generateOTP(long time) {
         long stime = time/1000;
-        int ttl = (int)(stime%validity);
-        String code = generate(key, stime/validity, otpLength);
-        return new OTP(code, ttl);
+        return generate(key, stime/validity, otpLength);
+    }
+
+    public long getEndValidity(long time) {
+        return (time/1000/validity + 1)*validity*1000;
     }
 
     private static String generate(byte[] key, long time, int digits) {

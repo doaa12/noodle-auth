@@ -32,7 +32,7 @@ public class MainDialog extends javax.swing.JDialog {
         initComponents();
         listModel.removeAllElements();
         for (Account acc : conf.getAccounts()) {
-            listModel.addElement(acc);
+            listModel.addElement(new Token(acc));
         }
         list.setCellRenderer(renderer);
         list.setModel(listModel);
@@ -48,8 +48,7 @@ public class MainDialog extends javax.swing.JDialog {
         refreshTask = new TimerTask() {
             @Override
             public void run() {
-                renderer.captureTime();
-                list.repaint();
+                refresh();
             }
         };
         TIMER.schedule(refreshTask, 0, 1000);
@@ -66,16 +65,43 @@ public class MainDialog extends javax.swing.JDialog {
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
+        settingsMenu = new javax.swing.JPopupMenu();
+        addAccount = new javax.swing.JMenuItem();
+        editAccount = new javax.swing.JMenuItem();
+        removeAccount = new javax.swing.JMenuItem();
         jLabel1 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         list = new javax.swing.JList();
         buttonPanel = new javax.swing.JPanel();
-        add = new javax.swing.JButton();
-        edit = new javax.swing.JButton();
-        remove = new javax.swing.JButton();
         copy = new javax.swing.JButton();
+        settings = new javax.swing.JButton();
+
+        addAccount.setText("Add account...");
+        addAccount.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addAccountActionPerformed(evt);
+            }
+        });
+        settingsMenu.add(addAccount);
+
+        editAccount.setText("Edit account...");
+        editAccount.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                editAccountActionPerformed(evt);
+            }
+        });
+        settingsMenu.add(editAccount);
+
+        removeAccount.setText("Remove account");
+        removeAccount.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                removeAccountActionPerformed(evt);
+            }
+        });
+        settingsMenu.add(removeAccount);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Noodle authenticator");
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentResized(java.awt.event.ComponentEvent evt) {
                 formComponentResized(evt);
@@ -83,7 +109,7 @@ public class MainDialog extends javax.swing.JDialog {
         });
 
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setText("Verification codes:");
+        jLabel1.setText("Tokens");
         getContentPane().add(jLabel1, java.awt.BorderLayout.NORTH);
 
         jScrollPane1.setBackground(getBackground());
@@ -112,34 +138,6 @@ public class MainDialog extends javax.swing.JDialog {
 
         buttonPanel.setLayout(new java.awt.GridBagLayout());
 
-        add.setText("Add...");
-        add.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addActionPerformed(evt);
-            }
-        });
-        buttonPanel.add(add, new java.awt.GridBagConstraints());
-
-        edit.setText("Edit...");
-        edit.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                editActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
-        buttonPanel.add(edit, gridBagConstraints);
-
-        remove.setText("Remove");
-        remove.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                removeActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
-        buttonPanel.add(remove, gridBagConstraints);
-
         copy.setText("Copy token");
         copy.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -150,42 +148,22 @@ public class MainDialog extends javax.swing.JDialog {
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         buttonPanel.add(copy, gridBagConstraints);
 
+        settings.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/librebiz/noodleauth/gear-black.png"))); // NOI18N
+        settings.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                settingsActionPerformed(evt);
+            }
+        });
+        buttonPanel.add(settings, new java.awt.GridBagConstraints());
+
         getContentPane().add(buttonPanel, java.awt.BorderLayout.PAGE_END);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void addActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addActionPerformed
-        Account acc = AccountDialog.doDialog(this, conf, null);
-        if (acc != null) {
-            listModel.addElement(acc);
-            save();
-        }
-    }//GEN-LAST:event_addActionPerformed
-
     private void listValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_listValueChanged
         selectionChanged();
     }//GEN-LAST:event_listValueChanged
-
-    private void editActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editActionPerformed
-        int ix = list.getSelectedIndex();
-        if (ix >= 0) {
-            Account acc = (Account) listModel.getElementAt(ix);
-            acc = AccountDialog.doDialog(this, conf, acc);
-            if (acc != null) {
-                listModel.setElementAt(acc, ix);
-                save();
-            }
-        }
-    }//GEN-LAST:event_editActionPerformed
-
-    private void removeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeActionPerformed
-        int ix = list.getSelectedIndex();
-        if (ix >= 0) {
-            listModel.removeElementAt(ix);
-            save();
-        }
-    }//GEN-LAST:event_removeActionPerformed
 
     private void formComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentResized
         save();
@@ -195,10 +173,11 @@ public class MainDialog extends javax.swing.JDialog {
         if (evt.getClickCount() == 2) {
             int ix = list.locationToIndex(evt.getPoint());
             if (ix >= 0) {
-                Account acc = (Account) listModel.getElementAt(ix);
+                Token token = (Token) listModel.getElementAt(ix);
+                Account acc = token.getAccount();
                 acc = AccountDialog.doDialog(this, conf, acc);
                 if (acc != null) {
-                    listModel.setElementAt(acc, ix);
+                    listModel.setElementAt(new Token(acc), ix);
                     save();
                 }
             }
@@ -208,30 +187,74 @@ public class MainDialog extends javax.swing.JDialog {
     private void copyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_copyActionPerformed
         int ix = list.getSelectedIndex();
         if (ix >= 0) {
-            Account acc = (Account) listModel.getElementAt(ix);
-            OTP otp = acc.generateOTP(System.currentTimeMillis());
-            StringSelection sel = new StringSelection(otp.getCode());
+            Token token = (Token) listModel.getElementAt(ix);
+            StringSelection sel = new StringSelection(token.getCode());
             Clipboard clip = Toolkit.getDefaultToolkit().getSystemClipboard();
             clip.setContents(sel, null);
         }
     }//GEN-LAST:event_copyActionPerformed
 
+    private void addAccountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addAccountActionPerformed
+        Account acc = AccountDialog.doDialog(this, conf, null);
+        if (acc != null) {
+            listModel.addElement(new Token(acc));
+            save();
+        }
+    }//GEN-LAST:event_addAccountActionPerformed
+
+    private void editAccountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editAccountActionPerformed
+        int ix = list.getSelectedIndex();
+        if (ix >= 0) {
+            Token token = (Token) listModel.getElementAt(ix);
+            Account acc = token.getAccount();
+            acc = AccountDialog.doDialog(this, conf, acc);
+            if (acc != null) {
+                listModel.setElementAt(new Token(acc), ix);
+                save();
+            }
+        }
+    }//GEN-LAST:event_editAccountActionPerformed
+
+    private void removeAccountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeAccountActionPerformed
+        int ix = list.getSelectedIndex();
+        if (ix >= 0) {
+            listModel.removeElementAt(ix);
+            save();
+        }
+    }//GEN-LAST:event_removeAccountActionPerformed
+
+    private void settingsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_settingsActionPerformed
+        settingsMenu.show(settings, 0, 0);
+    }//GEN-LAST:event_settingsActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton add;
+    private javax.swing.JMenuItem addAccount;
     private javax.swing.JPanel buttonPanel;
     private javax.swing.JButton copy;
-    private javax.swing.JButton edit;
+    private javax.swing.JMenuItem editAccount;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JList list;
-    private javax.swing.JButton remove;
+    private javax.swing.JMenuItem removeAccount;
+    private javax.swing.JButton settings;
+    private javax.swing.JPopupMenu settingsMenu;
     // End of variables declaration//GEN-END:variables
 
     private void selectionChanged() {
         int ix = list.getSelectedIndex();
-        edit.setEnabled(ix >= 0);
-        remove.setEnabled(ix >= 0);
+        editAccount.setEnabled(ix >= 0);
+        removeAccount.setEnabled(ix >= 0);
         copy.setEnabled(ix >= 0);
+    }
+
+    private void refresh() {
+        long time = System.currentTimeMillis();
+        int count = listModel.getSize();
+        for (int i = 0; i < count; ++i) {
+            Token token = (Token) listModel.getElementAt(i);
+            token.tic(time);
+        }
+        list.repaint();
     }
 
     private void save() {
@@ -242,7 +265,8 @@ public class MainDialog extends javax.swing.JDialog {
             int count = listModel.getSize();
             List<Account> accounts = new ArrayList<Account>(count);
             for (int i = 0; i < count; ++i) {
-                accounts.add((Account) listModel.getElementAt(i));
+                Token token = (Token) listModel.getElementAt(i);
+                accounts.add(token.getAccount());
             }
             conf.setAccounts(accounts);
             conf.save();

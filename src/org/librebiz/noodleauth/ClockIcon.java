@@ -9,34 +9,23 @@ import java.awt.geom.Arc2D;
 import javax.swing.Icon;
 
 public class ClockIcon implements Icon {
-    private int secs;
-    private int duration;
+    private double angle;
     private final int width;
     private final int height;
     private Color fillColor = Color.CYAN;
     private Color strokeColor = null;
 
-    public ClockIcon(int width, int height, int secs, int duration) {
+    public ClockIcon(int width, int height) {
         this.width = width;
         this.height = height;
-        this.secs = secs;
-        this.duration = duration;
     }
 
-    public int getSecs() {
-        return secs;
+    public double getAngle() {
+        return angle;
     }
 
-    public void setSecs(int secs) {
-        this.secs = secs;
-    }
-
-    public int getDuration() {
-        return duration;
-    }
-
-    public void setDuration(int duration) {
-        this.duration = duration;
+    public void setAngle(double newValue) {
+        angle = newValue;
     }
 
     public Color getFillColor() {
@@ -74,7 +63,7 @@ public class ClockIcon implements Icon {
             Arc2D.Float arc = new Arc2D.Float(Arc2D.PIE);
             arc.setFrame(x+1, y+1, width-2, height-2);
             arc.setAngleStart(90);
-            arc.setAngleExtent(-secs*360.0/duration);
+            arc.setAngleExtent(angle);
             if (fillColor != null) {
                 g2.setColor(fillColor);
                 g2.fill(arc);

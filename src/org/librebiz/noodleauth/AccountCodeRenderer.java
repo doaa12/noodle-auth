@@ -18,11 +18,6 @@ public class AccountCodeRenderer extends JPanel implements ListCellRenderer {
         ClockIcon ci = (ClockIcon)clock.getIcon();
         ci.setFillColor(clock.getBackground());
         ci.setStrokeColor(clock.getForeground());
-        captureTime();
-    }
-
-    final void captureTime() {
-        time = System.currentTimeMillis();
     }
 
     @SuppressWarnings("unchecked")
@@ -51,7 +46,7 @@ public class AccountCodeRenderer extends JPanel implements ListCellRenderer {
 
         clock.setBackground(new java.awt.Color(204, 255, 255));
         clock.setForeground(new java.awt.Color(102, 102, 102));
-        clock.setIcon(new ClockIcon(32, 32, 10, 60));
+        clock.setIcon(new ClockIcon(32, 32));
         clock.setPreferredSize(new java.awt.Dimension(32, 32));
         add(clock, java.awt.BorderLayout.EAST);
     }// </editor-fold>//GEN-END:initComponents
@@ -67,14 +62,12 @@ public class AccountCodeRenderer extends JPanel implements ListCellRenderer {
     public Component getListCellRendererComponent(JList list, Object value,
             int index, boolean isSelected, boolean cellHasFocus) {
         ClockIcon ci = null;
-        if (value instanceof Account) {
-            Account acc = (Account)value;
+        if (value instanceof Token) {
+            Token token = (Token)value;
             ci = (ClockIcon)clock.getIcon();
-            OTP otp = acc.generateOTP(time);
-            ci.setSecs(otp.getTTL());
-            ci.setDuration(acc.getValidity());
-            name.setText(acc.getName());
-            code.setText(otp.getCode());
+            ci.setAngle(token.getAngle());
+            name.setText(token.getAccount().getName());
+            code.setText(token.getCode());
         } else {
             name.setText("Account name");
             code.setText("Code");
